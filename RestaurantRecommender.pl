@@ -3211,8 +3211,6 @@ restaurant("Nawabs Empire","NorthIndian","QuickBites",3.2,1,1,-1.325279008508858
 restaurant("SeeYa Restaurant","NorthIndian","QuickBites",3.3,1,1,-0.379846696763747,-0.8187017899191095).
 
 
-
-recommendation(Name, Cuisine, DiningType, Rating, Price, Rvalue, Xcoord, Ycoord) :- restaurant(Name, Cuisine, DiningType, Rating, Price, Rvalue, Xcoord, Ycoord).
 coordinates(Name, X, Y) :- restaurant(Name, _, _, _, _, _, X, Y).
 restaurant_value(Name, Rvalue) :- restaurant(Name, _, _, _, _, Rvalue, _, _).
 
@@ -3235,21 +3233,19 @@ rvalue_partition([], _, [], [], _, _).
 rvalue_partition([X|Xs], Y, [X|Ls], Rs, Xcoord, Ycoord) :-
     calc_score(X, Xcoord, Ycoord, Xscore),
     calc_score(Y, Xcoord, Ycoord, Yscore),
-    Xscore =< Yscore, rvalue_partition(Xs, Y, Ls, Rs, Xcoord, Ycoord).
+    Xscore > Yscore, rvalue_partition(Xs, Y, Ls, Rs, Xcoord, Ycoord).
 
 rvalue_partition([X|Xs], Y, Ls, [X|Rs], Xcoord, Ycoord) :-
     calc_score(X, Xcoord, Ycoord, Xscore),
     calc_score(Y, Xcoord, Ycoord, Yscore),
-    Xscore > Yscore, rvalue_partition(Xs, Y, Ls, Rs, Xcoord, Ycoord).
+    Xscore =< Yscore, rvalue_partition(Xs, Y, Ls, Rs, Xcoord, Ycoord).
 
 calc_score(R, X1, Y1, S) :-
     coordinates(R, X2, Y2),
     D is sqrt((X1 - X2)^2 + (Y1 - Y2)^2),
     scale_value(D, 0, 11.313708, 0, 1, Scaled_D),
     restaurant_value(R, V),
-    writef('%f', Scaled_D),
     scale_value(V, 0, 5, 0, 1, Scaled_V),
-    writef('%f', Scaled_V),
     S is 0.25*(1 - Scaled_D) + 0.75*Scaled_V.
 
 scale_value(Value, Min, Max, NewMin, NewMax, R) :-
@@ -3258,7 +3254,7 @@ scale_value(Value, Min, Max, NewMin, NewMax, R) :-
 
 recommend_restaurants(Cuisine, DiningType, PriceRange, Xcoord, Ycoord, Recommendations) :-
     findall(Name, restaurant(Name, Cuisine, DiningType, _, PriceRange, _, _, _), Unsorted_List),
-    quick_sort(Unsorted_List, Sorted_List, Xcoord, Ycoord), take(5, Sorted_List, Recommendations).
+    quick_sort(Unsorted_List, Sorted_List, Xcoord, Ycoord), !, take(5, Sorted_List, Recommendations).
 
 
 start(Recommendations) :-
@@ -3281,3 +3277,12 @@ start(Recommendations) :-
     read(YAns),nl,nl,
 
     recommend_restaurants(CuisineAns, DiningTypeAns, PriceAns, XAns, YAns, Recommendations).
+
+
+
+
+
+
+
+
+
